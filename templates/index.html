@@ -215,6 +215,71 @@
         .sonnet { background: linear-gradient(90deg, #667eea, #764ba2); }
         .opus { background: linear-gradient(90deg, #f093fb, #f5576c); }
         .haiku { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+
+        .today-section {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.15));
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .today-section .today-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .today-section .today-title .live-dot {
+            width: 12px;
+            height: 12px;
+            background: #4facfe;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .today-stats {
+            display: flex;
+            gap: 40px;
+        }
+
+        .today-stat {
+            text-align: center;
+        }
+
+        .today-stat .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .today-stat .label {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .today-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .today-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -223,6 +288,28 @@
             <h1>📊 Claude Code Token Stats</h1>
             <p class="update-time" id="update-time">加载中...</p>
         </header>
+
+        <!-- 今日实时统计 -->
+        <div class="today-section">
+            <div class="today-title">
+                <span class="live-dot"></span>
+                今日实时统计
+            </div>
+            <div class="today-stats">
+                <div class="today-stat">
+                    <div class="value" id="today-tokens">-</div>
+                    <div class="label">今日 Token</div>
+                </div>
+                <div class="today-stat">
+                    <div class="value" id="today-requests">-</div>
+                    <div class="label">今日请求</div>
+                </div>
+                <div class="today-stat">
+                    <div class="value" id="today-cost">-</div>
+                    <div class="label">今日费用</div>
+                </div>
+            </div>
+        </div>
 
         <div class="stats-grid" id="stats-grid">
             <div class="stat-card highlight">
@@ -326,6 +413,21 @@
                 document.getElementById('total-cost').textContent = '$' + data.totals.totalCost.toFixed(2);
                 document.getElementById('total-messages').textContent = formatNumber(data.totalMessages);
                 document.getElementById('total-sessions').textContent = data.totalSessions;
+
+                // 更新今日统计
+                const today = new Date().toISOString().split('T')[0];
+                const todayData = data.dailyTokens.find(d => d.date === today);
+                if (todayData) {
+                    document.getElementById('today-tokens').textContent = formatTokens(todayData.total);
+                    document.getElementById('today-requests').textContent = formatNumber(todayData.requests || 0);
+                    // 计算今日费用 (假设 Sonnet 定价)
+                    const todayCost = (todayData.input / 1_000_000) * 3.00 + (todayData.output / 1_000_000) * 15.00;
+                    document.getElementById('today-cost').textContent = '$' + todayCost.toFixed(2);
+                } else {
+                    document.getElementById('today-tokens').textContent = '0';
+                    document.getElementById('today-requests').textContent = '0';
+                    document.getElementById('today-cost').textContent = '$0.00';
+                }
 
                 // 更新时间
                 document.getElementById('update-time').textContent =
