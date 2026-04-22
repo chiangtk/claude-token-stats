@@ -13,6 +13,8 @@ from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
+VERSION = "1.1.0"
+
 STATS_FILE = Path.home() / ".claude" / "stats-cache.json"
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
 
@@ -234,6 +236,7 @@ def api_stats():
         })
 
     return jsonify({
+        "version": VERSION,
         "firstSession": data.get("firstSessionDate", "") if data else "",
         "totalSessions": data.get("totalSessions", 0) if data else 0,
         "totalMessages": data.get("totalMessages", 0) if data else 0,
@@ -257,7 +260,7 @@ def api_stats():
 
 if __name__ == "__main__":
     print("=" * 50)
-    print("🚀 Claude Token Stats Web UI")
+    print(f"🚀 Claude Token Stats Web UI v{VERSION}")
     print("=" * 50)
     print(f"📁 数据源: {STATS_FILE}")
     print(f"🌐 访问地址: http://localhost:5000")

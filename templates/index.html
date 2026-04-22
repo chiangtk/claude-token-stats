@@ -47,6 +47,12 @@
             font-size: 0.9em;
         }
 
+        .version {
+            color: #667eea;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -287,6 +293,7 @@
         <header>
             <h1>📊 Claude Code Token Stats</h1>
             <p class="update-time" id="update-time">加载中...</p>
+            <p class="version" id="version"></p>
         </header>
 
         <!-- 今日实时统计 -->
@@ -432,6 +439,9 @@
                 // 更新时间
                 document.getElementById('update-time').textContent =
                     '最后更新: ' + new Date(data.lastUpdated).toLocaleString('zh-CN');
+                if (data.version) {
+                    document.getElementById('version').textContent = 'v' + data.version;
+                }
 
                 // 模型列表
                 const modelList = document.getElementById('model-list');
