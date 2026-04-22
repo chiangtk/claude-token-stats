@@ -56,3 +56,11 @@ Data is read from Claude Code session files:
 ## License
 
 MIT License
+
+## Development
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for:
+- Feature roadmap
+- Improvement suggestions
+- Architecture overview
+- Contributing guidelines
