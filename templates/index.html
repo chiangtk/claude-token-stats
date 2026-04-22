@@ -406,7 +406,7 @@
 
                 // 更新统计卡片
                 document.getElementById('total-tokens').textContent = formatTokens(data.totals.totalTokens);
-                document.getElementById('total-requests').textContent = formatNumber(data.totalRequests);
+                document.getElementById('total-requests').textContent = formatNumber(data.totalApiCalls || data.totalRequests);
                 document.getElementById('total-input').textContent = formatTokens(data.totals.inputTokens);
                 document.getElementById('total-output').textContent = formatTokens(data.totals.outputTokens);
                 document.getElementById('cache-read').textContent = formatTokens(data.totals.cacheReadInputTokens);
@@ -419,7 +419,7 @@
                 const todayData = data.dailyTokens.find(d => d.date === today);
                 if (todayData) {
                     document.getElementById('today-tokens').textContent = formatTokens(todayData.total);
-                    document.getElementById('today-requests').textContent = formatNumber(todayData.requests || 0);
+                    document.getElementById('today-requests').textContent = formatNumber(todayData.apiCalls || todayData.requests || 0);
                     // 计算今日费用 (假设 Sonnet 定价)
                     const todayCost = (todayData.input / 1_000_000) * 3.00 + (todayData.output / 1_000_000) * 15.00;
                     document.getElementById('today-cost').textContent = '$' + todayCost.toFixed(2);

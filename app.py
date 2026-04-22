@@ -86,6 +86,7 @@ def get_realtime_usage():
     total_cache_read = 0
     total_cache_write = 0
     total_requests = 0
+    total_api_calls = 0  # 所有 API 调用次数（包括无 token 的）
     daily_stats = {}  # 按日期统计
 
     # 遍历所有项目的 session 文件
@@ -105,33 +106,41 @@ def get_realtime_usage():
                                 cache_read = usage.get("cache_read_input_tokens", 0)
                                 cache_write = usage.get("cache_creation_input_tokens", 0)
 
+                                # 统计所有 API 调用
+                                total_api_calls += 1
+
+                                # 统计 token
+                                total_input += input_t
+                                total_output += output_t
+                                total_cache_read += cache_read
+                                total_cache_write += cache_write
+
                                 # 只统计有实际 token 的请求
                                 if input_t > 0 or output_t > 0:
-                                    total_input += input_t
-                                    total_output += output_t
-                                    total_cache_read += cache_read
-                                    total_cache_write += cache_write
                                     total_requests += 1
 
-                                    # 获取日期
-                                    timestamp = data.get("timestamp", "")
-                                    if timestamp:
-                                        try:
-                                            dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-                                            date_str = dt.strftime("%Y-%m-%d")
-                                            if date_str not in daily_stats:
-                                                daily_stats[date_str] = {
-                                                    "tokens": 0,
-                                                    "requests": 0,
-                                                    "input": 0,
-                                                    "output": 0,
-                                                }
-                                            daily_stats[date_str]["tokens"] += input_t + output_t
+                                # 获取日期
+                                timestamp = data.get("timestamp", "")
+                                if timestamp:
+                                    try:
+                                        dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+                                        date_str = dt.strftime("%Y-%m-%d")
+                                        if date_str not in daily_stats:
+                                            daily_stats[date_str] = {
+                                                "tokens": 0,
+                                                "requests": 0,
+                                                "apiCalls": 0,
+                                                "input": 0,
+                                                "output": 0,
+                                            }
+                                        daily_stats[date_str]["tokens"] += input_t + output_t
+                                        daily_stats[date_str]["apiCalls"] += 1
+                                        daily_stats[date_str]["input"] += input_t
+                                        daily_stats[date_str]["output"] += output_t
+                                        if input_t > 0 or output_t > 0:
                                             daily_stats[date_str]["requests"] += 1
-                                            daily_stats[date_str]["input"] += input_t
-                                            daily_stats[date_str]["output"] += output_t
-                                        except:
-                                            pass
+                                    except:
+                                        pass
                         except json.JSONDecodeError:
                             continue
             except Exception:
@@ -144,6 +153,7 @@ def get_realtime_usage():
         "cacheCreationInputTokens": total_cache_write,
         "totalTokens": total_input + total_output,
         "totalRequests": total_requests,
+        "totalApiCalls": total_api_calls,
         "dailyStats": daily_stats,
     }
 
@@ -167,6 +177,7 @@ def api_stats():
     total_cache_read = realtime["cacheReadInputTokens"]
     total_cache_write = realtime["cacheCreationInputTokens"]
     total_requests = realtime["totalRequests"]
+    total_api_calls = realtime["totalApiCalls"]
     total_cost = 0
 
     for model, usage in model_usage.items():
@@ -205,6 +216,7 @@ def api_stats():
             "date": date,
             "total": stats["tokens"],
             "requests": stats["requests"],
+            "apiCalls": stats["apiCalls"],
             "input": stats["input"],
             "output": stats["output"],
         })
@@ -216,6 +228,7 @@ def api_stats():
         activity_chart.append({
             "date": date,
             "messages": stats["requests"],
+            "apiCalls": stats["apiCalls"],
             "sessions": 1,
             "toolCalls": 0,
         })
@@ -225,6 +238,7 @@ def api_stats():
         "totalSessions": data.get("totalSessions", 0) if data else 0,
         "totalMessages": data.get("totalMessages", 0) if data else 0,
         "totalRequests": total_requests,
+        "totalApiCalls": total_api_calls,
         "models": models,
         "totals": {
             "inputTokens": total_input,
