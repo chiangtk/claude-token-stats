@@ -13,7 +13,7 @@ from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 STATS_FILE = Path.home() / ".claude" / "stats-cache.json"
 PROJECTS_DIR = Path.home() / ".claude" / "projects"

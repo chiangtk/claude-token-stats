@@ -2,7 +2,7 @@
 
 Real-time token usage monitoring for Claude Code - Web UI version
 
-**Current Version: v1.1.0**
+**Current Version: v1.2.0**
 
 ## Quick Start
 
@@ -31,6 +31,11 @@ Then visit: http://localhost:5000
 - 💰 Estimated cost calculation
 
 ## Changelog
+
+### v1.2.0
+- Added Chinese/English language toggle
+- Fixed model display (now shows all models including glm-5.1)
+- Added color coding for different models
 
 ### v1.1.0
 - Added today's real-time stats panel
