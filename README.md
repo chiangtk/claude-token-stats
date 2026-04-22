@@ -1,49 +1,53 @@
 # Claude Code Token Stats
 
-实时查看 Claude Code 的 token 消耗统计 - Web UI 版本
+Real-time token usage monitoring for Claude Code - Web UI version
 
-**当前版本: v1.1.0**
+**Current Version: v1.1.0**
 
-## 快速启动
+## Quick Start
 
 ```bash
-# 进入项目目录
-cd ~/下载/claude-token-stats
+# Navigate to project directory
+cd ~/Downloads/claude-token-stats
 
-# 安装依赖
+# Install dependencies
 pip install -r requirements.txt
 
-# 启动服务
+# Start the server
 python app.py
 ```
 
-然后访问: http://localhost:5000
+Then visit: http://localhost:5000
 
-## 功能
+## Features
 
-- 📊 总体统计概览（输入/输出/缓存/费用）
-- 🔢 API 请求次数统计（包含所有 API 调用）
-- 📅 今日实时统计面板
-- 🤖 各模型详细使用情况
-- 📈 每日 Token 使用趋势图
-- 📊 活动统计（消息数/工具调用）
-- 🔄 自动每30秒刷新
-- 💰 预估费用计算
+- 📊 Overall statistics overview (input/output/cache/cost)
+- 🔢 API request count (includes all API calls)
+- 📅 Today's real-time stats panel
+- 🤖 Detailed usage by model
+- 📈 Daily token usage trend chart
+- 📊 Activity statistics (messages/tool calls)
+- 🔄 Auto-refresh every 30 seconds
+- 💰 Estimated cost calculation
 
-## 更新日志
+## Changelog
 
 ### v1.1.0
-- 新增今日实时统计面板
-- 修复 API 请求次数统计（现在包含所有 API 调用）
-- 添加版本号显示
+- Added today's real-time stats panel
+- Fixed API request count (now includes all API calls)
+- Added version display in UI and API
 
 ### v1.0.0
-- 初始版本
-- 基础 token 统计功能
+- Initial release
+- Basic token statistics functionality
 
-## 数据来源
+## Data Source
 
-数据来自 Claude Code 自动维护的 session 文件:
+Data is read from Claude Code session files:
 ```
 ~/.claude/projects/*/*.jsonl
 ```
+
+## License
+
+MIT License
