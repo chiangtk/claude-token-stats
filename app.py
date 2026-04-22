@@ -90,6 +90,7 @@ def get_realtime_usage():
     total_requests = 0
     total_api_calls = 0  # 所有 API 调用次数（包括无 token 的）
     daily_stats = {}  # 按日期统计
+    model_stats = {}  # 按模型统计
 
     # 遍历所有项目的 session 文件
     for project_dir in PROJECTS_DIR.iterdir():
@@ -108,6 +109,9 @@ def get_realtime_usage():
                                 cache_read = usage.get("cache_read_input_tokens", 0)
                                 cache_write = usage.get("cache_creation_input_tokens", 0)
 
+                                # 获取模型名称
+                                model = data.get("message", {}).get("model", "unknown")
+
                                 # 统计所有 API 调用
                                 total_api_calls += 1
 
@@ -120,6 +124,21 @@ def get_realtime_usage():
                                 # 只统计有实际 token 的请求
                                 if input_t > 0 or output_t > 0:
                                     total_requests += 1
+
+                                    # 按模型统计
+                                    if model not in model_stats:
+                                        model_stats[model] = {
+                                            "input": 0,
+                                            "output": 0,
+                                            "cacheRead": 0,
+                                            "cacheWrite": 0,
+                                            "requests": 0,
+                                        }
+                                    model_stats[model]["input"] += input_t
+                                    model_stats[model]["output"] += output_t
+                                    model_stats[model]["cacheRead"] += cache_read
+                                    model_stats[model]["cacheWrite"] += cache_write
+                                    model_stats[model]["requests"] += 1
 
                                 # 获取日期
                                 timestamp = data.get("timestamp", "")
@@ -157,6 +176,7 @@ def get_realtime_usage():
         "totalRequests": total_requests,
         "totalApiCalls": total_api_calls,
         "dailyStats": daily_stats,
+        "modelStats": model_stats,
     }
 
 
@@ -172,34 +192,45 @@ def api_stats():
     # 获取实时数据
     realtime = get_realtime_usage()
 
-    model_usage = data.get("modelUsage", {}) if data else {}
-    models = []
     total_input = realtime["inputTokens"]
     total_output = realtime["outputTokens"]
     total_cache_read = realtime["cacheReadInputTokens"]
     total_cache_write = realtime["cacheCreationInputTokens"]
     total_requests = realtime["totalRequests"]
     total_api_calls = realtime["totalApiCalls"]
+    model_stats = realtime.get("modelStats", {})
+
+    # 从 session 文件统计的模型数据生成列表
+    models = []
     total_cost = 0
 
-    for model, usage in model_usage.items():
-        input_tokens = usage.get("inputTokens", 0)
-        output_tokens = usage.get("outputTokens", 0)
-        cache_read = usage.get("cacheReadInputTokens", 0)
-        cache_write = usage.get("cacheCreationInputTokens", 0)
+    for model_id, stats in model_stats.items():
+        input_tokens = stats.get("input", 0)
+        output_tokens = stats.get("output", 0)
+        cache_read = stats.get("cacheRead", 0)
+        cache_write = stats.get("cacheWrite", 0)
 
-        cost = calculate_cost(model, usage)
+        cost = calculate_cost(model_id, {
+            "inputTokens": input_tokens,
+            "outputTokens": output_tokens,
+            "cacheReadInputTokens": cache_read,
+            "cacheCreationInputTokens": cache_write,
+        })
         total_cost += cost["total"]
 
         models.append({
-            "name": MODEL_NAMES.get(model, model),
-            "id": model,
+            "name": MODEL_NAMES.get(model_id, model_id),
+            "id": model_id,
             "inputTokens": input_tokens,
             "outputTokens": output_tokens,
             "cacheReadInputTokens": cache_read,
             "cacheCreationInputTokens": cache_write,
             "cost": cost,
+            "requests": stats.get("requests", 0),
         })
+
+    # 按总 token 排序
+    models.sort(key=lambda x: x["inputTokens"] + x["outputTokens"], reverse=True)
 
     # 计算实时费用（假设使用 Sonnet 定价）
     realtime_cost = (
